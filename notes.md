@@ -319,8 +319,9 @@ I/O Device <-> Processor (ALU and Registers) <-> Memory (Data and Instructions)
 * *Registers* are where data is stored, 32 bits in size  
 * *ALU (Arithmetic Logic Unit)* is where the math is done, Looks at 2 registers patterns does math and stores result in another register  
 **Registers**  
-|Register Num | Register Name | Function |
-|----|-----|-------------|  
+
+| Register Num | Register Name | Function |  
+| ------------ | ------------- | -------- |  
 | $0 | $zero | Permanently zero |  
 | $1 | $at- Assembler Temporary (Reserved) |
 | $2, $3 | $v0, $v1 | Value returned by subroutines |  
@@ -338,21 +339,43 @@ Mips uses words (thus the use of .word at start of MIPS program) each value take
 Each instruction in MIPS is exactly 32 bits  
 Consists of the **R-type** **I-type** and **J-type**
 **R-type encoding** commands like add
-1. OP code - first 5 bits, 31-26    
-2. Rs - First non-return register in command, in add it is second register provided; 4 bits from 25 to 21  
-3. Rt - Third parameter (in add it is the last parameter), from 20 to 16 and is four bits long  
-4. Rd - Return register to store value (first parameter in add) and is 4 bits long from 15 to 11  
-5. Shamt - 5 bits long from 10 to 6  
-6. Funct - 6 bits long from 5 to 0      
+1. OP code- first 5 bits, 31-26    
+2. Rs- First non-return register in command, in add it is second register provided; 4 bits from 25 to 21  
+3. Rt- Third parameter (in add it is the last parameter), from 20 to 16 and is four bits long  
+4. Rd- Return register to store value (first parameter in add) and is 4 bits long from 15 to 11  
+5. Shamt- 5 bits long from 10 to 6  
+6. Funct- 6 bits long from 5 to 0      
 **I-type encoding** commands like lw and addi  
-1. Op code - from 31 to 26 same as R-type  
-2. Rs - First parameter, is where values are returned to store in this register  
-3. Rt - from 20 to 16 and is the second and only other register to look at  
-4. Immediate value - Value to be compared with that is an int of bits to increment by, from 15 to 0 and are half of whats encoded  
-At the end is translated to Hex and looks like 0x00622020
+1. Op code- from 31 to 26 same as R-type  
+2. Rs- First parameter, is where values are returned to store in this register  
+3. Rt- from 20 to 16 and is the second and only other register to look at  
+4. Immediate value- Value to be compared with that is an int of bits to increment by, from 15 to 0 and are half of whats encoded    
+**J-type encoding** commands like j  
+1. Op code- 31 to 26 bits  
+2. Jump address- address of register to jump to, from 25 to 0  
+* **MIPS only encodes address in multiples of 4**  
+* BNE is similar but encoded like:   
+1. Op code- 31 to 26 bits  
+2. Rs- First parameter from 25 to 21  
+3. Rt- Second parameter from 20 to 16  
+4. Immediate value- from 15 to 0, where the label/offset is encoded to jump to
+At the end is translated to Hex and looks like 0x00622020  
+MIPS code always starts similar to   
+```  
+.text   
+.globl main  
+main:  
+```  
+And ends with:
+```  
+li $v0, 10  
+syscall
+```  
 
 ## MIPS Commands      
-| Command | Name | What it does | Example | Explanation | If immediate version |
+
+| Command | Name | What it does | Example | Explanation | If immediate version |    
+| ------- | ---- | ------------ | ------- | ----------- | -------------------- |
 | LW | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version | 
 | SW | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version |
 | add | Add | Adds two registers | add $t0, $t1, $t2 | Adds values in t1 with t2 and stores in t0 | Has an immediate version |  
@@ -363,4 +386,7 @@ At the end is translated to Hex and looks like 0x00622020
 | nor | Returns true only if both are 0, can be used to create *not by comparing with 0* | nor $t2, $t0, $t1 | Compares t0 and t1 and only if both are 0 does t2 store 1 | No immediate version |  
 | sll | Shift left logically | Shifts register by given value bitwise left (multiplies by 2s) | sll $t1, $t0, 2 | Shifts left t0 by two bits and stores in t1 (equal to multiply by 4) | No immediate version | 
 | srl | Shift right logically | Shifts register by given value bitwise right (divides by 2s) | srl $t1, $t0, 2 | Shifts right t0 by two bits and stores in t1 (equal to divide by 4) | No immediate version |   
-| beq | Branch if equal | Jumps to label (name of an address) if the two registers are equal, else continues | beq $t0, $t1, DIV | Compares t0 and t1 and goes to DIV if the registers are equal | No immediate version | 
+| beq | Branch if equal | Jumps to label (name of an address) if the two registers are equal, else continues | beq $t0, $t1, DIV | Compares t0 and t1 and goes to DIV if the registers are equal | No immediate version |   
+| bne | Branch if not equal | Jumps to label if two registers are not equal, else continues | bne $t0, $t1, DIV | Compares t0 and t1 and jumps to DIV if the registers are not equal | No immediate version |   
+| j | Jump to label | Jumps to label provided no matter what | j L1 | jumps to label L1 | No immediate version |   
+| slt | See if register is less then | Sets register to 1 if register 1 is less than register 2, else sets register to 0 | slt $t2, $t0, $t1 | Sets t2 to 1 if t0 is less than t1 else t0 is 0 | Has an immediate version | 
