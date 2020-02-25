@@ -315,7 +315,12 @@ la t8, t0(t3)  # t8 is msgOut[i]
 j start    
   
 # Test Review  
-I/O Device <-> Processor (ALU and Registers) <-> Memory (Data and Instructions)  
+### Single Precesion   
+First bit - 1 
+Following 8 bits [1-9]- Following 8 bits are the bias with default single precision being 127 so if the decimal doesn't move bias is 128 and if it moves forward one bias is 129 in binary  
+Last bits up until 32 are the number converted to binary with the decimal moved and the leading 1 truncated
+### Architecture
+I/O Device <-> Processor (ALU and Registers) <-> Memory (Data and Instructions)    
 **Processor**  
 * *Registers* are where data is stored, 32 bits in size  
 * *ALU (Arithmetic Logic Unit)* is where the math is done, Looks at 2 registers patterns does math and stores result in another register  
@@ -334,9 +339,10 @@ I/O Device <-> Processor (ALU and Registers) <-> Memory (Data and Instructions)
 | $28 | $gp | Global Pointer |  
 | $29 | $sp | Stack Pointer |   
 | $30 | $fp | Frame Pointer |  
-| $31 | $ra | Return Address |  
+| $31 | $ra | Return Address |    
+
 Mips uses words (thus the use of .word at start of MIPS program) each value takes up 4 bytes  
-### MIPS Instruction Encoding 
+### MIPS Instruction Encoding   
 Each instruction in MIPS is exactly 32 bits  
 Consists of the **R-type** **I-type** and **J-type**
 **R-type encoding** commands like add
@@ -479,4 +485,5 @@ For raising to the power use (x + n/x) / 2 with n being power and x being base
 | c.le.s | Set a flag in the coprocessor if the first parameter is less than or equal to the second, else clear set flag | c.le.s $f0, $f1 | If $f0 is less than or equal set flag, else clear flag value | No immediate version |
 | bc1t | Branch if flag value is set | bc1t L1 | Jump to L1 if flag value is set | No immediate version |  
 | bc1f | Branch if flag value is unset | bc1f L1 | Jump to L1 if flag value is unset | no immediate version | 
-[Test Review 1](#test-review)            
+
+[Test Review 1](#test-review)              
