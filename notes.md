@@ -2,7 +2,8 @@
 ## Syllabus Week (day 1)  
   
 Professor Zhang(Zan)  
-Everything is done through Canvas  
+Everything is done through Canvas    
+[Test Review](#test-review)
   
 ## Number Representations  
 Base 16 integers usually are preceded by 0x..., thus 23 in base 16 is equal to 0x17  
@@ -359,7 +360,9 @@ Consists of the **R-type** **I-type** and **J-type**
 2. Rs- First parameter from 25 to 21  
 3. Rt- Second parameter from 20 to 16  
 4. Immediate value- from 15 to 0, where the label/offset is encoded to jump to
-At the end is translated to Hex and looks like 0x00622020  
+* Due to the amount of encoding done with commands like bne the address is not stored but rather the offset with respect to the address of bne
+At the end is translated to Hex and looks like 0x00622020    
+
 MIPS code always starts similar to   
 ```  
 .text   
@@ -370,14 +373,75 @@ And ends with:
 ```  
 li $v0, 10  
 syscall
-```  
+```      
+PC register always stores address of next command to execute    
+Data segment- started by .data and has lines following similar to array declarations  
+`A: .word 2, 2, 9, 1, 5, 8, 4`  
+A becomes a label for starting address which stores 2, all following values are stored 4 bytes after each other sequentially (array)  
+### Pseudo Instructions   
+Not real instruction implemented by hardware but rather implemented to make code more readable  
+Usually mapped to other real instructions, **the mapping is one-to-one**  
+Example: `li $t0, 4` translates to `ori $t0, $t0, 4`, both make t0 equal to 4  
+**$1** translates to $at register and should only be used for pseudo instructions   
+Example:   
+`li $t0, 90000` becomes -> `lui $t1, 1` which is load upper 16 bits and `ori $t0, $1, 24464`  
+When using functions one needs to use jal to **jump and link** the address and it's return address and at the end of the function one needs jr $ra to jump back to the line that follows the jal  
+When using functions registers $a0-$a3 are the four argument registers used to pass arguments, $v0 and $v1 are value registers used to return what is stored in them  
+Also in functions $t0-$t9 can be freely altered but $s0-$s7 must not change ($s0-$s7 are similar to const variables)  
+If we must use the $s0-$s7 registers in a function there original value must be stored somewhere safe so the altered register can be returned before jr $ra is called  
+In order to store them we save them in the stack  
+## Stack  
+The stack starts at *0x7ffffffc* and grows downwards (towards 0x00000000)  
+Stack is *FILO* (First in last out, similar to stack of papers)  
+$sp is the **stack pointer** and points to the top of the stack, so when moving it it is done in two commands:  
+1. `addi $sp, $sp, -4` moving the sp down four bits  
+2. `sw $s0, 0($sp)` stores value at the sp into the $s0 register  
+When done with the data the reverse must be used:  
+1. `lw $s0, 0($sp)`  
+2. `addi $sp, $sp, 4`  
+If dealing with nested functions since the location of $ra will be changed when hitting the jal in the first function $ra must be saved on the stack (by the above) due to it being similar to the $a0-$a7 registers and can't be changed within function without messing up return calls
+### Syscall  
+Command used to read the interger value stored in $v0 and can be used anywhere in code but `li $v0, 10` followed by syscall is to terminate program  
+Common syscall values:  
+1. **Print integer stored in $a0**  
+2. Print float stored in $f12  
+3. Print double stored in $f12  
+4. **Print string stored in $a0 (string must be terminated by null character)**  
+5. **Read integer with $v0 containing character read**    
+6. **Read double with $v0 conatining character read, value stored in $f0**
+8. Read string with $a0 being address of input buffer and $a1 maximum characters to read  
+10. **Terminate program**  
+11. Print character in $a0  
+12. Read character with $v0 containing character read
+17. Exit with $a0 being exit code returned  
+**$fp and $gp**  
+* $fp is to the frame pointer, this is a fixed variable once a function is called and will point to the top of the stack and will not increment  
+* $gp is to the global pointer, a reference to access the static data
+* $f0-$f12 are pseudo registers used to store floating point numbers  
+To use these registers:  
+* `l.s $f0, val` loads val into $f0  
+* `s.s $f0, val` stores val into $f0  
+* `li.s $f0, 0.5` loads immediate into $f0  
+To print and use these registers use:   
+* Print  
+	* `li $v0, 2`  
+	* `li.s $f12, 0.5`  
+	* syscall  
+* Read  
+	* `li $v0, 6`  
+	* `syscall` (read will be stored in $f0)  
+For raising to the power use (x + n/x) / 2 with n being power and x being base  
+### R-type, I-type, and J-type  
+
 
 ## MIPS Commands      
 
 | Command | Name | What it does | Example | Explanation | If immediate version |    
 | ------- | ---- | ------------ | ------- | ----------- | -------------------- |
-| LW | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version | 
-| SW | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version |
+| lw | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version built in (li pseudo instruction) |   
+| li | Load immediate | Store immediate value to register | li $t0, 4 | Store the value 4 into the register t0 | No immediate version, **pseudo instruction** |  
+| la | Load address | Store address into a register | la $t0, L1 | Store address of L1 into register t0 | No immediate version |
+| sw | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version |
 | add | Add | Adds two registers | add $t0, $t1, $t2 | Adds values in t1 with t2 and stores in t0 | Has an immediate version |  
 | sub | Subtract | Subtracts two registers | sub $t0, $t1, $t2 | Subtracts t1 by t2 and stores in t0 | Has an immediate version |
 | and | Logical and | Compare registers bit-wise and return true if only both are true | and $t2, $t0, $t1 | Compares t0 with t1 and stores bitwise and in t2 | Has an immediate version |      
@@ -389,4 +453,30 @@ syscall
 | beq | Branch if equal | Jumps to label (name of an address) if the two registers are equal, else continues | beq $t0, $t1, DIV | Compares t0 and t1 and goes to DIV if the registers are equal | No immediate version |   
 | bne | Branch if not equal | Jumps to label if two registers are not equal, else continues | bne $t0, $t1, DIV | Compares t0 and t1 and jumps to DIV if the registers are not equal | No immediate version |   
 | j | Jump to label | Jumps to label provided no matter what | j L1 | jumps to label L1 | No immediate version |   
-| slt | See if register is less then | Sets register to 1 if register 1 is less than register 2, else sets register to 0 | slt $t2, $t0, $t1 | Sets t2 to 1 if t0 is less than t1 else t0 is 0 | Has an immediate version | 
+| slt | See if register is less then | Sets register to 1 if register 1 is less than register 2, else sets register to 0 | slt $t2, $t0, $t1 | Sets t2 to 1 if t0 is less than t1 else t0 is 0 | Has an immediate version |   
+| sgt | See if register is greater then | Sets register to 1 if register 1 is greater than register 2, else sets register to 0 | sgt $t2, $t0, $t1 | Sets t2 to 1 if t0 is greater than t1 else t0 is 0 | Has an immediate version |   
+| blt | See if register is less then and branch | Jumps to label if register 1 is less than register 2 | slt $t0, $t1, L1 | Jumps to L1 if t0 is less then t1|  No immediate version, **pseudo instruction** |   
+| bgt | See if register is greater then and branch | Jumps to label if register 1 is greater than register 2 | bgt $t0, $t1, L1 | Jumps to L1 if t0 is greater than t1 | No immediate version, **pseudo instruction** |   
+| mul | Multiply | Multiples two registers and stores them in first argument | mul $t2, $t0, $t1 | Multiplies t0 by t1 and stores in t2 | Has an immediate version |  
+| div | Divide | Divides register by following register and stores in first argument | div $t2, $t0, $t1 | Divides t0 by t1 and stores result in t2 | Has an immediate version, **pseudo instruction** |  
+| mult | Multiply and store result in *Hi* (first half of number since multiplying can make number exceed one register) and *Lo* (second half of number) | mult $t0, $t1 | multiply t0 by t1 and store high word in hi and low word in lo | **pseudo instruction** |  
+| div | Divide and store result in *Hi* and *Lo* (Result is in hi while remainder, if there is one, is stored in lo) | div $t0, $t1 | divide t0 by t1 and store result in hi and remainder in lo | **pseudo instruction** |    
+| mfhi | Move from hi | mfhi $t0 | Move from hi register (wher mult and div are stored) and store in $t0 | No immediate version |  
+| mflo | Move from lo | mflo $t0 | Move from lo register (where mult and div are stored) and store in $t0 | No immediate version |
+| jal | Jump and link | jal L1 | Jumps to label L1 and links the line after jal to register $ra (return address) | No immediate version |   
+| jr | Jump to return address register | jr $ra | Jumps to the address stored in $ra(almost same as return in c++ but no value is returned here just exits function back to where it was called) | No immediate version | 
+| lb | Load a byte to the rightmost 8 bits of a register | lb $t0, 0($a0) | Stores a0 into t0 as it's byte value | No immediate version |  
+| sb | Store rightmost 8 bits of a register into memory | sb $t0, 0($a1) | Stores t0 byte value into t0 | No immediate version | 
+| syscall | System call that executes command based on value in $v0 | syscall | Looks into $v0 and does operation dependent on value stored there, common values are 10(exit), 1 (print int stored in $a0), 11 (print char in $a0) | No immediate version |
+| abs | Finds values absolute value | abs.s $f0, $f1 | Finds values absolute value and stores result from $f1 to $f0 | No immediate version, **pseudo instruction** |
+| neg | Finds value a negative number | neg.s $f0, $f1 | Makes value in $f1 negative and stores it in $f0 | No immediate version, **pseudo instruction** |  
+| mov.s | Copy value from one register to another | mov.s $f0, $f1 | Copies $f1 into $f0 | No immediate version |   
+| mfc1 | Copies from f register to t | mfc1 $t0, $f0 | Copies $f0 data and puts it into $t0 | No immediate version |  
+| mtc1 | Copies from t register to f | mtc1 $f0, $t0 | Copies $t0 data into $f0 register | No immediate version |  
+| cvt.s.w | Converts integer to float | cvt.s.w $f0, $f1 | Converts 32 bits in $f1 that is an integer to a float stored in $f0 | No immediate version |   
+| cvt.w.s | Converts float to integer | cvt.w.s $f0, $f1 | Converts 32 bit float in $f1 to 32 bit integer and stores it in $f0 | No immediate version |   
+| c.lt.s | Set a flag in coprocessor if first parameter is less then second, else clear set flag values | c.lt.s $f0, $f1 | If $f0 is less then $f1 set flag, else clear set flag | No immediate version |   
+| c.le.s | Set a flag in the coprocessor if the first parameter is less than or equal to the second, else clear set flag | c.le.s $f0, $f1 | If $f0 is less than or equal set flag, else clear flag value | No immediate version |
+| bc1t | Branch if flag value is set | bc1t L1 | Jump to L1 if flag value is set | No immediate version |  
+| bc1f | Branch if flag value is unset | bc1f L1 | Jump to L1 if flag value is unset | no immediate version | 
+[Test Review 1](#test-review)            
