@@ -3,7 +3,8 @@
   
 Professor Zhang(Zan)  
 Everything is done through Canvas    
-[Test Review](#test-review)
+[Test Review](#test-review)  
+[MIPS Commands](#mips-commands)
   
 ## Number Representations  
 Base 16 integers usually are preceded by 0x..., thus 23 in base 16 is equal to 0x17  
