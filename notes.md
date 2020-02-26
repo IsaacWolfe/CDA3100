@@ -436,16 +436,89 @@ To print and use these registers use:
 * Read  
 	* `li $v0, 6`  
 	* `syscall` (read will be stored in $f0)  
-For raising to the power use (x + n/x) / 2 with n being power and x being base  
-### R-type, I-type, and J-type  
+For raising to the power use (x + n/x) / 2 with n being power and x being base    
+### MIPS Interrupts   
+Everything above start of stack (0x7ffffff) is used by the system, meaning special operating system functions, I/O registers mapped to memory, Kernel data, etc...  
+SPIM allows reading from keyboard, similar to reading from the actual I/O register  
+Program to print input until 'q' is entered:  
+```  
+	.text  
+	.globl main  
+main:  
+	addi $s0, $0, 113 #q key  
+	lui $t0, 0xFFFF # $t0 = 0xFFFF0000  
+waitloop:  
+	lw $t1, 0($t0)  
+	andi $t1, $t1, 0x0001  
+	beq $t1, $zero, waitloop   
+	  
+	lw $a0, 4($t0)  
+	  
+	beq $a0, $s0, done  
+	  
+	li $v0, 1  
+	syscall  
+	  
+	li $v0, 4  
+	la $a0, new_line  
+	syscall  
+	  
+	j waitloop  
+done:   
+	li $v0, 10 #exit  
+	syscall  
+	  
+	.data  
+new_line: .asciiz "\n"
+```    
+*SPIM Output*  
+Spim has two memory locations for output  
+1. 0xffff0008  
+	* Transmitter control  
+	* bit ready: 0  
+2. 0xffff000c  
+	* bit0-7: data byte    
+To print you:  
+1. Check if ready bit is 1  
+2. Write to the data. Ready bit will reset to 0 and will change back to 1 after data is transmitted  
+With an external interrupt following will occur:  
+* The address of the instruction that is about to be executed is saved into a special register called EPC  
+* PC is set to be 0x80000180 (this is the starting address of the interrupt handler, PC is program counter and keeps track of next command location to be executed)  
+* Last, ERET is then executed setting PC to the value stored in EPC    
+Can $t0 be used it interrupt?  
+No, because the function is not expecting the interrupt to change and $t0 can't be viewed to see if a change occurred and thus will use the wrong value  
+Interrupts should be short and mostly used to set flags (which can be registers but are accessed quicker)
+### R-type, I-type, and J-type    
+**R-types**:  
+* Consists of:  
+	* Op code(31 to 26)- Machine code used to identify command to be used in 6 bits and different commands can have the same op code differentiated by the func code  
+	* Rs(25 to 21)- Register source (first parameter being used by command)  
+	* Rt(20 to 16)- Register target (second parameter being used by command)  
+	* Rd(15 to 11)- Register destination (what register to store the return of the command in)  
+	* Shift/SHAMT(10 to 6)- How much to shift the rs by  
+	* Func(5 to 0)- for functions with the same Op code this is used to distinguish the command    
+* Includes FR instructions which are used only for floating point numbers  
+* All these functions have the same op code of 0x00 and use func codes to distinguish them
+**I-types**:  
+* Consists of:  
+	* Op code(31 to 26)- Same as above  
+	* Rt(25 to 21)- Register target  
+	* Rs(20 to 16)- Register source  
+	* IMM(15 to 0)- 16 bits for the immediate value as a signed int (any number exceeding 16 bits cannot be used)    
+* Most are done in order of **op, rt, imm(rs)** but commands like beq and bne execute by **op, rs, rt, imm**    
+* Includes FI instructions which are used only for floating point numbers
+**J-types**:  
+* Consists of:  
+	* Op code(31 to 26)- Same as above  
+	* Label/pseudo address( 25 to 0)- in order to fit the address (which is 32 bits) the 2 least significant and 4 most significant bits are removed 
+### Op Codes and Encoding
 
+# MIPS Commands        
 
-## MIPS Commands      
-
-| Command | Name | What it does | Example | Explanation | If immediate version |    
-| ------- | ---- | ------------ | ------- | ----------- | -------------------- |
-| lw | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version built in (li pseudo instruction) |   
-| li | Load immediate | Store immediate value to register | li $t0, 4 | Store the value 4 into the register t0 | No immediate version, **pseudo instruction** |  
+| Command | Name | What it does | Example | Explanation | If immediate version | Op Code/Func codes |    
+| ------- | ---- | ------------ | ------- | ----------- | -------------------- | ------------------ |
+| lw | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version built in (li pseudo instruction) | Ox23 |    
+| li | Load immediate | Store immediate value to register | li $t0, 4 | Store the value 4 into the register t0 | No immediate version, **pseudo instruction** | 0x2b |  
 | la | Load address | Store address into a register | la $t0, L1 | Store address of L1 into register t0 | No immediate version |
 | sw | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version |
 | add | Add | Adds two registers | add $t0, $t1, $t2 | Adds values in t1 with t2 and stores in t0 | Has an immediate version |  
