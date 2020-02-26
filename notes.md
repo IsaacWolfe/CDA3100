@@ -539,25 +539,25 @@ Interrupts should be short and mostly used to set flags (which can be registers 
 | bgt | See if register is greater then and branch | Jumps to label if register 1 is greater than register 2 | bgt $t0, $t1, L1 | Jumps to L1 if t0 is greater than t1 | No immediate version, **pseudo instruction** |   
 | mul | Multiply | Multiples two registers and stores them in first argument | mul $t2, $t0, $t1 | Multiplies t0 by t1 and stores in t2 | Has an immediate version |  
 | div | Divide | Divides register by following register and stores in first argument | div $t2, $t0, $t1 | Divides t0 by t1 and stores result in t2 | Has an immediate version, **pseudo instruction** |  
-| mult | Multiply and store result in *Hi* (first half of number since multiplying can make number exceed one register) and *Lo* (second half of number) | mult $t0, $t1 | multiply t0 by t1 and store high word in hi and low word in lo | **pseudo instruction** | 0x00/0x18 |  
-| div | Divide and store result in *Hi* and *Lo* (Result is in hi while remainder, if there is one, is stored in lo) | div $t0, $t1 | divide t0 by t1 and store result in hi and remainder in lo | **pseudo instruction** | 0x00/0x1a |    
-| mfhi | Move from hi | mfhi $t0 | Move from hi register (wher mult and div are stored) and store in $t0 | No immediate version | 0x00/0x10 |  
-| mflo | Move from lo | mflo $t0 | Move from lo register (where mult and div are stored) and store in $t0 | No immediate version | 0x00/0x12 |  
-| jal | Jump and link | jal L1 | Jumps to label L1 and links the line after jal to register $ra (return address) | No immediate version | 0x03 |   
-| jr | Jump to return address register | jr $ra | Jumps to the address stored in $ra(almost same as return in c++ but no value is returned here just exits function back to where it was called) | No immediate version | 0x08 |
-| lb | Load a byte to the rightmost 8 bits of a register | lb $t0, 0($a0) | Stores a0 into t0 as it's byte value | No immediate version | 0x20 |  
-| sb | Store rightmost 8 bits of a register into memory | sb $t0, 0($a1) | Stores t0 byte value into t0 | No immediate version | 0x28 |
-| syscall | System call that executes command based on value in $v0 | syscall | Looks into $v0 and does operation dependent on value stored there, common values are 10(exit), 1 (print int stored in $a0), 11 (print char in $a0) | No immediate version |
-| abs | Finds values absolute value | abs.s $f0, $f1 | Finds values absolute value and stores result from $f1 to $f0 | No immediate version, **pseudo instruction** |
-| neg | Finds value a negative number | neg.s $f0, $f1 | Makes value in $f1 negative and stores it in $f0 | No immediate version, **pseudo instruction** |  
-| mov.s | Copy value from one register to another | mov.s $f0, $f1 | Copies $f1 into $f0 | No immediate version |   
-| mfc1 | Copies from f register to t | mfc1 $t0, $f0 | Copies $f0 data and puts it into $t0 | No immediate version |  
-| mtc1 | Copies from t register to f | mtc1 $f0, $t0 | Copies $t0 data into $f0 register | No immediate version |  
-| cvt.s.w | Converts integer to float | cvt.s.w $f0, $f1 | Converts 32 bits in $f1 that is an integer to a float stored in $f0 | No immediate version |   
-| cvt.w.s | Converts float to integer | cvt.w.s $f0, $f1 | Converts 32 bit float in $f1 to 32 bit integer and stores it in $f0 | No immediate version |   
-| c.lt.s | Set a flag in coprocessor if first parameter is less then second, else clear set flag values | c.lt.s $f0, $f1 | If $f0 is less then $f1 set flag, else clear set flag | No immediate version |   
-| c.le.s | Set a flag in the coprocessor if the first parameter is less than or equal to the second, else clear set flag | c.le.s $f0, $f1 | If $f0 is less than or equal set flag, else clear flag value | No immediate version |
-| bc1t | Branch if flag value is set | bc1t L1 | Jump to L1 if flag value is set | No immediate version |  
-| bc1f | Branch if flag value is unset | bc1f L1 | Jump to L1 if flag value is unset | no immediate version | 
+| mult | Multiply into hi and lo | Multiply and store result in *Hi* (first half of number since multiplying can make number exceed one register) and *Lo* (second half of number) | mult $t0, $t1 | multiply t0 by t1 and store high word in hi and low word in lo | **pseudo instruction** | 0x00/0x18 |  
+| div | Divide into hi and lo | Divide and store result in *Hi* and *Lo* (Result is in hi while remainder, if there is one, is stored in lo) | div $t0, $t1 | divide t0 by t1 and store result in hi and remainder in lo | **pseudo instruction** | 0x00/0x1a |    
+| mfhi | Move from hi | Move from high register | mfhi $t0 | Move from hi register (wher mult and div are stored) and store in $t0 | No immediate version | 0x00/0x10 |  
+| mflo | Move from lo | Move from lo register | mflo $t0 | Move from lo register (where mult and div are stored) and store in $t0 | No immediate version | 0x00/0x12 |  
+| jal | Jump and link | Jump to label and link line after jal to return | jal L1 | Jumps to label L1 and links the line after jal to register $ra (return address) | No immediate version | 0x03 |   
+| jr | Jump to return address | Jump to return address register | jr $ra | Jumps to the address stored in $ra(almost same as return in c++ but no value is returned here just exits function back to where it was called) | No immediate version | 0x08 |
+| lb | Load byte | Load a byte to the rightmost 8 bits of a register | lb $t0, 0($a0) | Stores a0 into t0 as it's byte value | No immediate version | 0x20 |  
+| sb | Store byte | Store rightmost 8 bits of a register into memory | sb $t0, 0($a1) | Stores t0 byte value into t0 | No immediate version | 0x28 |
+| syscall | System call | System call that executes command based on value in $v0 | syscall | Looks into $v0 and does operation dependent on value stored there, common values are 10(exit), 1 (print int stored in $a0), 11 (print char in $a0) | No immediate version |
+| abs | Absolute Value | Finds values absolute value | abs.s $f0, $f1 | Finds values absolute value and stores result from $f1 to $f0 | No immediate version, **pseudo instruction** |
+| neg | Make negative | Finds value a negative number | neg.s $f0, $f1 | Makes value in $f1 negative and stores it in $f0 | No immediate version, **pseudo instruction** |  
+| mov.s | Copy | Copy value from one register to another | mov.s $f0, $f1 | Copies $f1 into $f0 | No immediate version |   
+| mfc1 | Copy register $f to $t | Copies from f register to t | mfc1 $t0, $f0 | Copies $f0 data and puts it into $t0 | No immediate version |  
+| mtc1 | Copy register $t to $f | Copies from t register to f | mtc1 $f0, $t0 | Copies $t0 data into $f0 register | No immediate version |  
+| cvt.s.w | Convert int to float | Converts integer to float | cvt.s.w $f0, $f1 | Converts 32 bits in $f1 that is an integer to a float stored in $f0 | No immediate version |   
+| cvt.w.s | Convert float to int | Converts float to integer | cvt.w.s $f0, $f1 | Converts 32 bit float in $f1 to 32 bit integer and stores it in $f0 | No immediate version |   
+| c.lt.s | Set flag if less than |Set a flag in coprocessor if first parameter is less then second, else clear set flag values | c.lt.s $f0, $f1 | If $f0 is less then $f1 set flag, else clear set flag | No immediate version |   
+| c.le.s | Set flag if less than or equal | Set a flag in the coprocessor if the first parameter is less than or equal to the second, else clear set flag | c.le.s $f0, $f1 | If $f0 is less than or equal set flag, else clear flag value | No immediate version |
+| bc1t | Branch if flag set | Branch if flag value is set | bc1t L1 | Jump to L1 if flag value is set | No immediate version |  
+| bc1f | Branch flag unset | Branch if flag value is unset | bc1f L1 | Jump to L1 if flag value is unset | no immediate version | 
 
 [Test Review 1](#test-review)              
