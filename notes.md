@@ -518,34 +518,34 @@ Interrupts should be short and mostly used to set flags (which can be registers 
 | Command | Name | What it does | Example | Explanation | If immediate version | Op Code/Func codes |    
 | ------- | ---- | ------------ | ------- | ----------- | -------------------- | ------------------ |
 | lw | Load Word | Store from memory to a register | lw $t0, 32($s3) | Load from 32 bits into s3 into register t0 | No immediate version built in (li pseudo instruction) | Ox23 |    
-| li | Load immediate | Store immediate value to register | li $t0, 4 | Store the value 4 into the register t0 | No immediate version, **pseudo instruction** | 0x2b |  
+| li | Load immediate | Store immediate value to register | li $t0, 4 | Store the value 4 into the register t0 | No immediate version, **pseudo instruction** |  
 | la | Load address | Store address into a register | la $t0, L1 | Store address of L1 into register t0 | No immediate version |
-| sw | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version |
-| add | Add | Adds two registers | add $t0, $t1, $t2 | Adds values in t1 with t2 and stores in t0 | Has an immediate version |  
-| sub | Subtract | Subtracts two registers | sub $t0, $t1, $t2 | Subtracts t1 by t2 and stores in t0 | Has an immediate version |
-| and | Logical and | Compare registers bit-wise and return true if only both are true | and $t2, $t0, $t1 | Compares t0 with t1 and stores bitwise and in t2 | Has an immediate version |      
-| or | Logical or | Compares two registers and returns true if either is true | or $t2, $t0, $t1 | Compares t0 and t1 and if any have a 1 then 1 is stored in t2 | Has an immediate version |  
-| xor | Logical exclusive or | Compares two registers and returns true only if one register is true and the other false | xor $t2, $t0, $t1 | Compares t0 to t1 and stores 1 in t2 only if one of the registers is true and not both true | Has an immediate version |   
-| nor | Returns true only if both are 0, can be used to create *not by comparing with 0* | nor $t2, $t0, $t1 | Compares t0 and t1 and only if both are 0 does t2 store 1 | No immediate version |  
-| sll | Shift left logically | Shifts register by given value bitwise left (multiplies by 2s) | sll $t1, $t0, 2 | Shifts left t0 by two bits and stores in t1 (equal to multiply by 4) | No immediate version | 
-| srl | Shift right logically | Shifts register by given value bitwise right (divides by 2s) | srl $t1, $t0, 2 | Shifts right t0 by two bits and stores in t1 (equal to divide by 4) | No immediate version |   
-| beq | Branch if equal | Jumps to label (name of an address) if the two registers are equal, else continues | beq $t0, $t1, DIV | Compares t0 and t1 and goes to DIV if the registers are equal | No immediate version |   
-| bne | Branch if not equal | Jumps to label if two registers are not equal, else continues | bne $t0, $t1, DIV | Compares t0 and t1 and jumps to DIV if the registers are not equal | No immediate version |   
-| j | Jump to label | Jumps to label provided no matter what | j L1 | jumps to label L1 | No immediate version |   
-| slt | See if register is less then | Sets register to 1 if register 1 is less than register 2, else sets register to 0 | slt $t2, $t0, $t1 | Sets t2 to 1 if t0 is less than t1 else t0 is 0 | Has an immediate version |   
-| sgt | See if register is greater then | Sets register to 1 if register 1 is greater than register 2, else sets register to 0 | sgt $t2, $t0, $t1 | Sets t2 to 1 if t0 is greater than t1 else t0 is 0 | Has an immediate version |   
-| blt | See if register is less then and branch | Jumps to label if register 1 is less than register 2 | slt $t0, $t1, L1 | Jumps to L1 if t0 is less then t1|  No immediate version, **pseudo instruction** |   
+| sw | Store Word | Store from register to memory | sw $t0, 48($s3) | Store from register t0 into s3 48 bits into it | No immediate version | 0x2b |
+| add | Add | Adds two registers | add $t0, $t1, $t2 | Adds values in t1 with t2 and stores in t0 | Has an immediate version | 0x00/0x20 |  
+| sub | Subtract | Subtracts two registers | sub $t0, $t1, $t2 | Subtracts t1 by t2 and stores in t0 | Has an immediate version | 0x00/0x22 |
+| and | Logical and | Compare registers bit-wise and return true if only both are true | and $t2, $t0, $t1 | Compares t0 with t1 and stores bitwise and in t2 | Has an immediate version | 0x00/0x24 |  
+| or | Logical or | Compares two registers and returns true if either is true | or $t2, $t0, $t1 | Compares t0 and t1 and if any have a 1 then 1 is stored in t2 | Has an immediate version | 0x00/0x25 |  
+| xor | Logical exclusive or | Compares two registers and returns true only if one register is true and the other false | xor $t2, $t0, $t1 | Compares t0 to t1 and stores 1 in t2 only if one of the registers is true and not both true | Has an immediate version | 0x00/0x25 |  
+| nor | Returns true only if both are 0, can be used to create *not by comparing with 0* | nor $t2, $t0, $t1 | Compares t0 and t1 and only if both are 0 does t2 store 1 | No immediate version | 0x00/0x27 |  
+| sll | Shift left logically | Shifts register by given value bitwise left (multiplies by 2s) | sll $t1, $t0, 2 | Shifts left t0 by two bits and stores in t1 (equal to multiply by 4) | No immediate version | 0x00/0x00 |  
+| srl | Shift right logically | Shifts register by given value bitwise right (divides by 2s) | srl $t1, $t0, 2 | Shifts right t0 by two bits and stores in t1 (equal to divide by 4) | No immediate version | 0x00/0x02 |   
+| beq | Branch if equal | Jumps to label (name of an address) if the two registers are equal, else continues | beq $t0, $t1, DIV | Compares t0 and t1 and goes to DIV if the registers are equal | No immediate version | 0x04 |   
+| bne | Branch if not equal | Jumps to label if two registers are not equal, else continues | bne $t0, $t1, DIV | Compares t0 and t1 and jumps to DIV if the registers are not equal | No immediate version | 0x05 |   
+| j | Jump to label | Jumps to label provided no matter what | j L1 | jumps to label L1 | No immediate version | 0x02 |   
+| slt | See if register is less then | Sets register to 1 if register 1 is less than register 2, else sets register to 0 | slt $t2, $t0, $t1 | Sets t2 to 1 if t0 is less than t1 else t0 is 0 | Has an immediate version | 0x00/0x2a |   
+| sgt | See if register is greater then | Sets register to 1 if register 1 is greater than register 2, else sets register to 0 | sgt $t2, $t0, $t1 | Sets t2 to 1 if t0 is greater than t1 else t0 is 0 | Has an immediate version |    
+| blt | See if register is less then and branch | Jumps to label if register 1 is less than register 2 | slt $t0, $t1, L1 | Jumps to L1 if t0 is less then t1|  No immediate version, **pseudo instruction** |    
 | bgt | See if register is greater then and branch | Jumps to label if register 1 is greater than register 2 | bgt $t0, $t1, L1 | Jumps to L1 if t0 is greater than t1 | No immediate version, **pseudo instruction** |   
 | mul | Multiply | Multiples two registers and stores them in first argument | mul $t2, $t0, $t1 | Multiplies t0 by t1 and stores in t2 | Has an immediate version |  
 | div | Divide | Divides register by following register and stores in first argument | div $t2, $t0, $t1 | Divides t0 by t1 and stores result in t2 | Has an immediate version, **pseudo instruction** |  
-| mult | Multiply and store result in *Hi* (first half of number since multiplying can make number exceed one register) and *Lo* (second half of number) | mult $t0, $t1 | multiply t0 by t1 and store high word in hi and low word in lo | **pseudo instruction** |  
-| div | Divide and store result in *Hi* and *Lo* (Result is in hi while remainder, if there is one, is stored in lo) | div $t0, $t1 | divide t0 by t1 and store result in hi and remainder in lo | **pseudo instruction** |    
-| mfhi | Move from hi | mfhi $t0 | Move from hi register (wher mult and div are stored) and store in $t0 | No immediate version |  
-| mflo | Move from lo | mflo $t0 | Move from lo register (where mult and div are stored) and store in $t0 | No immediate version |
-| jal | Jump and link | jal L1 | Jumps to label L1 and links the line after jal to register $ra (return address) | No immediate version |   
-| jr | Jump to return address register | jr $ra | Jumps to the address stored in $ra(almost same as return in c++ but no value is returned here just exits function back to where it was called) | No immediate version | 
-| lb | Load a byte to the rightmost 8 bits of a register | lb $t0, 0($a0) | Stores a0 into t0 as it's byte value | No immediate version |  
-| sb | Store rightmost 8 bits of a register into memory | sb $t0, 0($a1) | Stores t0 byte value into t0 | No immediate version | 
+| mult | Multiply and store result in *Hi* (first half of number since multiplying can make number exceed one register) and *Lo* (second half of number) | mult $t0, $t1 | multiply t0 by t1 and store high word in hi and low word in lo | **pseudo instruction** | 0x00/0x18 |  
+| div | Divide and store result in *Hi* and *Lo* (Result is in hi while remainder, if there is one, is stored in lo) | div $t0, $t1 | divide t0 by t1 and store result in hi and remainder in lo | **pseudo instruction** | 0x00/0x1a |    
+| mfhi | Move from hi | mfhi $t0 | Move from hi register (wher mult and div are stored) and store in $t0 | No immediate version | 0x00/0x10 |  
+| mflo | Move from lo | mflo $t0 | Move from lo register (where mult and div are stored) and store in $t0 | No immediate version | 0x00/0x12 |  
+| jal | Jump and link | jal L1 | Jumps to label L1 and links the line after jal to register $ra (return address) | No immediate version | 0x03 |   
+| jr | Jump to return address register | jr $ra | Jumps to the address stored in $ra(almost same as return in c++ but no value is returned here just exits function back to where it was called) | No immediate version | 0x08 |
+| lb | Load a byte to the rightmost 8 bits of a register | lb $t0, 0($a0) | Stores a0 into t0 as it's byte value | No immediate version | 0x20 |  
+| sb | Store rightmost 8 bits of a register into memory | sb $t0, 0($a1) | Stores t0 byte value into t0 | No immediate version | 0x28 |
 | syscall | System call that executes command based on value in $v0 | syscall | Looks into $v0 and does operation dependent on value stored there, common values are 10(exit), 1 (print int stored in $a0), 11 (print char in $a0) | No immediate version |
 | abs | Finds values absolute value | abs.s $f0, $f1 | Finds values absolute value and stores result from $f1 to $f0 | No immediate version, **pseudo instruction** |
 | neg | Finds value a negative number | neg.s $f0, $f1 | Makes value in $f1 negative and stores it in $f0 | No immediate version, **pseudo instruction** |  
